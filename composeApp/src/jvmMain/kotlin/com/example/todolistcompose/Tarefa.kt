@@ -8,6 +8,6 @@ enum class Prioridade{
 data class Tarefa(
     val id: Int,
     val descricao: String,
-    var concluida: Boolean = false,
-    val prioridade: Prioridade
+    val prioridade: Prioridade,
+    var concluida: Boolean = false
 )

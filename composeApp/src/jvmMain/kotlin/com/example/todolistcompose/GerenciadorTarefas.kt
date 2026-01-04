@@ -14,20 +14,27 @@ class GerenciadorTarefas {
     }
 
     fun listarTarefas(): List<Tarefa> {
-        return tarefas.toList()
+        // SOLUÇÃO: Cria cópias de cada tarefa
+        return tarefas.map { it.copy() }
     }
 
     fun marcarComoConcluida(id: Int): Boolean {
         val tarefa = tarefas.find { it.id == id }
         return if (tarefa != null && !tarefa.concluida) {
             tarefa.concluida = true
+            println("✓ Tarefa ${tarefa.id} marcada como concluída")
             true
         } else {
+            println("✗ Tarefa já concluída ou não encontrada")
             false
         }
     }
 
     fun removerTarefa(id: Int): Boolean {
         return tarefas.removeIf { it.id == id }
+    }
+
+    fun forcarAtualizacao() {
+        // Não faz nada, só para forçar recriação
     }
 }

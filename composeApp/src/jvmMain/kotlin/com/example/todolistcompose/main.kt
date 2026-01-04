@@ -26,19 +26,16 @@ fun main() = application {
 @Composable
 @Preview
 fun App() {
+
     val gerenciador = remember { GerenciadorTarefas() }
 
     MaterialTheme {
         TodoListScreen(gerenciador)
     }
 }
-
 @Composable
 fun TodoListScreen(gerenciador: GerenciadorTarefas) {
-    // guardar lista de tarefas
     var tarefas by remember { mutableStateOf(gerenciador.listarTarefas()) }
-
-    // campo para os inputs
     var novaTarefaTexto by remember { mutableStateOf("") }
     var prioridadeSelecionada by remember { mutableStateOf(Prioridade.MEDIA) }
 
@@ -47,14 +44,12 @@ fun TodoListScreen(gerenciador: GerenciadorTarefas) {
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // titulo
         Text(
             text = "📝 Minhas Tarefas",
             style = MaterialTheme.typography.h4,
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        // Espaço para adicionar tarefa
         Card(
             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
             elevation = 4.dp
@@ -100,23 +95,26 @@ fun TodoListScreen(gerenciador: GerenciadorTarefas) {
                             novaTarefaTexto = ""
                         }
                     },
-                    modifier = Modifier.align(Alignment.End)  // CORRIGIDO: sem chaves
+                    modifier = Modifier.align(Alignment.End)
                 ) {
                     Text("➕ Adicionar")
                 }
             }
         }
 
-        // Lista de tarefas
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(tarefas) { tarefa ->
+            items(
+                items = tarefas,
+                key = { it.id }  // IMPORTANTE: usa ID como key
+            ) { tarefa ->
                 TarefaItem(
                     tarefa = tarefa,
                     onConcluir = {
                         gerenciador.marcarComoConcluida(tarefa.id)
+                        gerenciador.forcarAtualizacao()
                         tarefas = gerenciador.listarTarefas()
                     },
                     onRemover = {
@@ -128,8 +126,6 @@ fun TodoListScreen(gerenciador: GerenciadorTarefas) {
         }
     }
 }
-
-
 @Composable
 fun TarefaItem(
     tarefa: Tarefa,
@@ -149,7 +145,6 @@ fun TarefaItem(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Coluna com informações da tarefa
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = tarefa.descricao,
@@ -157,12 +152,15 @@ fun TarefaItem(
                     textDecoration = if (tarefa.concluida)
                         TextDecoration.LineThrough
                     else
-                        null
+                        null,
+                    color = if (tarefa.concluida)
+                        Color.Gray
+                    else
+                        Color.Black
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // Badge de prioridade
                 val corPrioridade = when (tarefa.prioridade) {
                     Prioridade.BAIXA -> Color.Green
                     Prioridade.MEDIA -> Color.Blue
@@ -170,13 +168,12 @@ fun TarefaItem(
                 }
 
                 Text(
-                    text = "● ${tarefa.prioridade.name}",
+                    text = "● ${tarefa.prioridade.name}" + if (tarefa.concluida) " - CONCLUÍDA" else "",
                     style = MaterialTheme.typography.caption,
-                    color = corPrioridade
+                    color = if (tarefa.concluida) Color.Gray else corPrioridade
                 )
             }
 
-            // Botões de ação
             Row {
                 if (!tarefa.concluida) {
                     Button(
